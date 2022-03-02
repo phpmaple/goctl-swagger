@@ -76,7 +76,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 
 			path := group.GetAnnotation("prefix") + route.Path
 			parameters := swaggerParametersObject{}
-
+			
 			if countParams(path) > 0 {
 				p := strings.Split(path, "/")
 				for i := range p {
@@ -84,7 +84,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 					if strings.Contains(part, ":") {
 						key := strings.TrimPrefix(p[i], ":")
 						path = strings.Replace(path, fmt.Sprintf(":%s", key), fmt.Sprintf("{%s}", key), 1)
-
+						
 						spo := swaggerParameterObject{
 							Name:     key,
 							In:       "path",
@@ -110,15 +110,54 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 							// remove quotes
 							spo.Description = strings.Trim(prop, "\"")
 						}
-
+						// if (key == "id") {
+						// 	fmt.Printf("%+v\n", spo)
+						// 	continue
+						// }
 						parameters = append(parameters, spo)
 					}
 				}
 			}
 			if defineStruct, ok := route.RequestType.(spec.DefineStruct); ok {
+			
+				for _, member := range defineStruct.Members {
+					if strings.Contains(member.Tag, "header") {
+						sp := swaggerParameterObject{
+							Name:     "",
+							In:       "header",
+							Required: true,
+							Type:     "string",
+						}
+						for _, tag := range member.Tags() {
+							sp.Name = tag.Name
+							if len(tag.Options) == 0 {
+								sp.Required = true
+								continue
+							}
+							for _, option := range tag.Options {
+								if strings.HasPrefix(option, defaultOption) {
+									segs := strings.Split(option, equalToken)
+									if len(segs) == 2 {
+										sp.Default = segs[1]
+									}
+								} else if !strings.HasPrefix(option, optionalOption) {
+									sp.Required = true
+								}
+							}
+						}
+	
+						if len(member.Comment) > 0 {
+							sp.Description = strings.TrimLeft(member.Comment, "//")
+						}
+						fmt.Printf("header: %+v\n", sp)
+	
+						parameters = append(parameters, sp)
+					}
+				}
 				if strings.ToUpper(route.Method) == http.MethodGet {
 					for _, member := range defineStruct.Members {
 						if strings.Contains(member.Tag, "path") {
+
 							continue
 						}
 						tempKind := swaggerMapTypes[strings.Replace(member.Type.Name(), "[]", "", -1)]
@@ -151,11 +190,11 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 						if len(member.Comment) > 0 {
 							sp.Description = strings.TrimLeft(member.Comment, "//")
 						}
+						fmt.Printf("%+v\n", sp)
 
 						parameters = append(parameters, sp)
 					}
 				} else {
-
 					reqRef := fmt.Sprintf("#/definitions/%s", route.RequestType.Name())
 
 					if len(route.RequestType.Name()) > 0 {
@@ -182,7 +221,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 					}
 				}
 			}
-
+			
 			pathItemObject, ok := paths[path]
 			if !ok {
 				pathItemObject = swaggerPathItemObject{}
@@ -232,6 +271,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 			}
 
 			operationObject.Description = strings.ReplaceAll(operationObject.Description, "\"", "")
+			// fmt.Printf("%+v\n", operationObject)
 
 			switch strings.ToUpper(route.Method) {
 			case http.MethodGet:
@@ -271,12 +311,18 @@ func renderReplyAsDefinition(d swaggerDefinitionsObject, m messageMap, p []spec.
 			if schema.Properties == nil {
 				schema.Properties = &swaggerSchemaObjectProperties{}
 			}
-			*schema.Properties = append(*schema.Properties, kv)
+			if !strings.Contains(member.Tag, "path") && !strings.Contains(member.Tag, "header") {
+				fmt.Printf("%+v\n",member.Tag )
+				*schema.Properties = append(*schema.Properties, kv)
+			}
 
 			for _, tag := range member.Tags() {
+
 				if len(tag.Options) == 0 {
 					if !contains(schema.Required, tag.Name) && tag.Name != "required" {
-						schema.Required = append(schema.Required, tag.Name)
+						if !strings.Contains(member.Tag, "path") && !strings.Contains(member.Tag, "header") {
+							schema.Required = append(schema.Required, tag.Name)
+						}
 					}
 					continue
 				}
@@ -284,7 +330,9 @@ func renderReplyAsDefinition(d swaggerDefinitionsObject, m messageMap, p []spec.
 					switch {
 					case !strings.HasPrefix(option, optionalOption):
 						if !contains(schema.Required, tag.Name) {
-							schema.Required = append(schema.Required, tag.Name)
+							if !strings.Contains(member.Tag, "path") && !strings.Contains(member.Tag, "header") {
+								schema.Required = append(schema.Required, tag.Name)
+							}
 						}
 						// case strings.HasPrefix(option, defaultOption):
 						// case strings.HasPrefix(option, optionsOption):

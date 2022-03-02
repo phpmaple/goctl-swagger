@@ -1,0 +1,92 @@
+syntax = "v1"
+
+info(
+	title: "客户相关接口"
+	author: "WangSx"
+	date:   "2022-03-01"
+	desc:   "客户相关接口"
+	email: "402314889@qq.com"
+	version: "v1"
+)
+
+type Customer {
+	CustomerId  string `json:"uuid"`         // 客户ID
+	Username    string `json:"username"`     // 姓名
+	Name        string `json:"name"`         // 昵称
+	Avatar      string `json:"avatar"`       // 头像
+	CountryCode string `json:"country_code"` // 国家码
+	PhoneNumber string `json:"phone_number"` // 手机号
+	Email       string `json:"email"`        // 邮箱
+	Num         string `json:"num"`          // 购次
+	Source      string `json:"source"`       // 来源渠道
+	Desc        string `json:"desc"`         // 备注
+	LastAt      string `json:"last_at"`      // 最近购买时间
+	CreatedAt   string `json:"created_at"`   // 创建时间
+	UpdatedAt   string `json:"updated_at"`   // 更新时间
+	DeletedAt   string `json:"deleted_at"`   // 删除时间 空值: 正常, 有值: 注销
+}
+
+type ListCustomerReq {
+	Page           int64  `form:"page"`                       // 当前页码
+	PageSize       int64  `form:"page_size,default=15"`       // 展示数量
+	OrderBy        string `form:"orderby,default=created_at"` // 排序字段,默认 created_at
+	Sort           string `form:"sort,default=desc"`          // 排序方式(asc,desc), 默认 desc
+	Name           string `form:"name,optional"`              // 用户昵称搜索
+	IsDeleteAt     string `form:"is_deleted_at,optional"`     // 用户状态 , "true":已注销, "false":正常
+	CreatedAtStart string `form:"created_at_start,optional"`  // 创建时间起始时间
+	CreatedAtEnd   string `form:"created_at_end,optional"`    // 创建时间结束时间
+	LastAtStart    string `form:"last_at_start,optional"`     // 最后购买时间起始时间
+	LastAtEnd      string `form:"last_at_end,optional"`       // 最后购买时间结束时间
+}
+
+type ListCustomerResp {
+	Total int64      `json:"total"` // 总数
+	List  []Customer `json:"list"`  // 数据集
+}
+
+type GetCustomerReq {
+	CustomerId string `path:"uuid,optional"` // 客户ID,解析path:id,不需要传值
+}
+
+type EditDescCustomerReq {
+	CustomerId string `path:"uuid,optional"` // 客户ID,解析path:id,不需要传值
+	Desc       string `json:"desc"`          // 备注
+}
+
+type DeleteCustomerReq {
+	CustomerId string `path:"uuid,optional"` // 客户ID,解析path:id,不需要传值
+}
+
+type EmptyCustomer {
+}
+
+@server(
+	group: customer
+	middleware: UUidCheck
+)
+
+service admin {
+	@doc(
+		summary: "客户列表"
+	)
+	@handler ListCustomer
+	get /customers (ListCustomerReq) returns (ListCustomerResp)
+	
+	@doc(
+		summary: "客户详情"
+	)
+	@handler GetCustomer
+	get /customer/:id (GetCustomerReq) returns (Customer)
+	
+	@doc(
+		summary: "修改客户备注"
+	)
+	@handler EditDescCustomer
+	put /customer/:id (EditDescCustomerReq) returns (EmptyCustomer)
+	
+	@doc(
+		summary: "注销客户"
+	)
+	@handler DeleteCustomer
+	delete /customer/:id (DeleteCustomerReq) returns (EmptyCustomer)
+}
