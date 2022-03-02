@@ -17,7 +17,7 @@
   ],
   "paths": {
     "/api/user/login": {
-      "post": {
+      "get": {
         "summary": "登录",
         "operationId": "login",
         "responses": {
@@ -28,18 +28,17 @@
         },
         "parameters": [
           {
-            "name": "h",
+            "name": "X-Tenant-Type",
+            "description": " 来自哪个平台",
             "in": "header",
             "required": true,
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
+            "name": "email",
+            "in": "query",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/LoginReq"
-            }
+            "type": "string"
           }
         ],
         "tags": [
@@ -137,6 +136,9 @@
     "LoginReq": {
       "type": "object",
       "properties": {
+        "email": {
+          "type": "string"
+        },
         "username": {
           "type": "string",
           "description": "测试"
@@ -148,6 +150,7 @@
       },
       "title": "LoginReq",
       "required": [
+        "email",
         "password"
       ]
     },

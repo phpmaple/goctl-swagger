@@ -156,7 +156,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 				}
 				if strings.ToUpper(route.Method) == http.MethodGet {
 					for _, member := range defineStruct.Members {
-						if strings.Contains(member.Tag, "path") {
+						if strings.Contains(member.Tag, "path") ||  strings.Contains(member.Tag, "header") ||  strings.Contains(member.Tag, "json") {
 
 							continue
 						}
@@ -190,7 +190,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 						if len(member.Comment) > 0 {
 							sp.Description = strings.TrimLeft(member.Comment, "//")
 						}
-						// fmt.Printf("%+v\n", sp)
+						fmt.Printf("%+v\n", member.Tag)
 
 						parameters = append(parameters, sp)
 					}

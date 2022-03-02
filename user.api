@@ -17,9 +17,10 @@ type (
     }
 
     LoginReq {
+        XTenantType string `header:"X-Tenant-Type"` // 来自哪个平台
+        Email       string `form:"email"`
         Username string `json:"username,optional,omitempty"` //测试
         Password string `json:"password"`//测试2
-        header string`header:"h"`
     }
     UserInfoReq {
         Id string `path:"id"`
@@ -53,7 +54,7 @@ service user-api {
         summary: 登录
     )
     @handler login
-    post /user/login (LoginReq)
+    get /user/login (LoginReq)
 
     @doc(
         summary: 获取用户信息
