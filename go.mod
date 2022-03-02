@@ -3,7 +3,6 @@ module github.com/phpmaple/goctl-swagger
 go 1.16
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/zeromicro/go-zero/tools/goctl v1.3.2

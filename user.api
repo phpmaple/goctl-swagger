@@ -17,7 +17,7 @@ type (
     }
 
     LoginReq {
-        Username string `json:"username,optional"` //测试
+        Username string `json:"username,optional,omitempty"` //测试
         Password string `json:"password"`//测试2
         header string`header:"h"`
     }
