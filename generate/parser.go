@@ -170,18 +170,24 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 						sp := swaggerParameterObject{In: "query", Type: ftype, Format: format}
 
 						for _, tag := range member.Tags() {
+
 							sp.Name = tag.Name
 							if len(tag.Options) == 0 {
 								sp.Required = true
 								continue
 							}
 							for _, option := range tag.Options {
+
 								if strings.HasPrefix(option, defaultOption) {
+
 									segs := strings.Split(option, equalToken)
 									if len(segs) == 2 {
 										sp.Default = segs[1]
 									}
-								} else if !strings.HasPrefix(option, optionalOption) {
+								}
+								if !strings.Contains(member.Tag, optionalOption) {
+									// fmt.Printf("%+v\n", option)
+
 									sp.Required = true
 								}
 							}
@@ -190,7 +196,7 @@ func renderServiceRoutes(service spec.Service, groups []spec.Group, paths swagge
 						if len(member.Comment) > 0 {
 							sp.Description = strings.TrimLeft(member.Comment, "//")
 						}
-						fmt.Printf("%+v\n", member.Tag)
+						// fmt.Printf("%+v\n", member.Tag)
 
 						parameters = append(parameters, sp)
 					}

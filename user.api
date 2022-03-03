@@ -18,7 +18,7 @@ type (
 
     LoginReq {
         XTenantType string `header:"X-Tenant-Type"` // 来自哪个平台
-        Email       string `form:"email"`
+        Email       string `form:"email,optional"`
         Username string `json:"username,optional,omitempty"` //测试
         Password string `json:"password"`//测试2
     }
@@ -35,7 +35,7 @@ type (
     }
 
     UserSearchReq {
-        KeyWord string `form:"keyWord"` // 关键词
+        KeyWord string `form:"keyWord,default=created_at,options=created_at|price|stock|sold_out,optional"` // 关键词
     }
 )
 

@@ -37,7 +37,7 @@
           {
             "name": "email",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string"
           }
         ],
@@ -89,8 +89,9 @@
             "name": "keyWord",
             "description": " 关键词",
             "in": "query",
-            "required": true,
-            "type": "string"
+            "required": false,
+            "type": "string",
+            "default": "created_at"
           }
         ],
         "tags": [
@@ -150,7 +151,6 @@
       },
       "title": "LoginReq",
       "required": [
-        "email",
         "password"
       ]
     },
@@ -215,13 +215,11 @@
       "properties": {
         "keyWord": {
           "type": "string",
+          "default": "created_at",
           "description": " 关键词"
         }
       },
-      "title": "UserSearchReq",
-      "required": [
-        "keyWord"
-      ]
+      "title": "UserSearchReq"
     }
   },
   "securityDefinitions": {
